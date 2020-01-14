@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -27,19 +26,37 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
 /**
  * @Author winterSwallow
  * @Date 2020-01-09 16:41
- * @Description Œƒµµπ§æﬂ¿‡∂®“Â
+ * @Description ÊñáÊ°£Â∑•ÂÖ∑Á±ªÂÆö‰πâ
  */
 public class DocHelper {
 
 	/**
-	 * –¥»ÎwordŒƒµµ
+	 * Ë°®Ê†ºÂÆΩÂ∫¶
 	 */
-	public void writeToWord(List<List<Map<Integer, String>>> tableList) {
+	public static String tableWidth = "9000";
+
+	/**
+	 * Ë°®Ê†ºÂçïÂÖÉÊ†ºËÉåÊôØËâ≤
+	 */
+	public static String tableCellBgColor = "D9EDF7";
+	/**
+	 * Ë°®Ê†ºÂçïÂÖÉÊ†ºÂÆΩÂ∫¶
+	 */
+	public static String tableCellWidth = "1300";
+	/**
+	 * Ë°®Ê†ºÂçïÂÖÉÊ†ºÈ´òÂ∫¶
+	 */
+	public static String tableCellHeight = "360";
+
+	/**
+	 * ÂÜôÂÖ•wordÊñáÊ°£
+	 */
+	public void writeToWord(List<List<RowInfo>> tableList, String filePath) {
 		XWPFDocument xwpfDocument = new XWPFDocument();
 		OutputStream outputStream = null;
 		BufferedOutputStream bufferedOutputStream = null;
 		try {
-			outputStream = new FileOutputStream(new File(CommonConst.FILE_PATH));
+			outputStream = new FileOutputStream(new File(filePath));
 			bufferedOutputStream = new BufferedOutputStream(outputStream, 1024);
 			for (int i = 0; i < tableList.size(); i++) {
 				writeTableToDoc(xwpfDocument, tableList.get(i), i);
@@ -68,54 +85,66 @@ public class DocHelper {
 	}
 
 	/**
-	 * ‘⁄Œƒµµ÷––¥»Î±Ì∏Ò
+	 * Âú®ÊñáÊ°£‰∏≠ÂÜôÂÖ•Ë°®Ê†º
 	 *
 	 * @param xwpfDocument
 	 * @param rowInfoList
 	 * @param pos
 	 */
-	public void writeTableToDoc(XWPFDocument xwpfDocument, List<Map<Integer, String>> rowInfoList, int pos) {
+	public void writeTableToDoc(XWPFDocument xwpfDocument, List<RowInfo> rowInfoList, int pos) {
 		XWPFTable xwpfTable = xwpfDocument.createTable(rowInfoList.size() + 2, 7);
 		setTableWidth(xwpfTable);
 		for (int i = 0; i < rowInfoList.size(); i++) {
-			Map<Integer, String> rowInfo = rowInfoList.get(i);
+			RowInfo rowInfo = rowInfoList.get(i);
 			XWPFTableRow tableNameRow = xwpfTable.getRow(0);
 			XWPFTableRow columnNameRow = xwpfTable.getRow(1);
-			XWPFTableRow row = xwpfTable.getRow(i + 2);
+			XWPFTableRow dataRow = xwpfTable.getRow(i + 2);
 			if (i == 0) {
-				setTableCell(tableNameRow, tableNameRow.getCell(0), true, CommonConst.COLUMN_NAME_ARRAY[0]);
+				// Á¨¨‰∏ÄË°åË°®Ëã±ÊñáÂêç
+				setTableCell(tableNameRow, tableNameRow.getCell(0), true, "Ëã±ÊñáÂêç");
 				mergeCellsHorizontal(xwpfTable, 0, 1, 2);
-				setTableCell(tableNameRow, tableNameRow.getCell(1), false, rowInfo.get(0));
+				setTableCell(tableNameRow, tableNameRow.getCell(1), false, rowInfo.getTableName());
 
-				setTableCell(tableNameRow, tableNameRow.getCell(3), true, CommonConst.COLUMN_NAME_ARRAY[1]);
+				// Á¨¨‰∏ÄË°åË°®‰∏≠ÊñáÊ≥®Èáä
+				setTableCell(tableNameRow, tableNameRow.getCell(3), true, "‰∏≠ÊñáÂêç");
 				mergeCellsHorizontal(xwpfTable, 0, 4, 6);
-				setTableCell(tableNameRow, tableNameRow.getCell(4), false, rowInfo.get(1));
+				setTableCell(tableNameRow, tableNameRow.getCell(4), false, rowInfo.getTableComment());
 
-				for (int j = 2; j < CommonConst.COLUMN_NAME_ARRAY.length; j++) {
-					setTableCell(columnNameRow, columnNameRow.getCell(j - 2), true, CommonConst.COLUMN_NAME_ARRAY[j]);
-				}
+				// Á¨¨‰∫åË°åÂàóÊ†áÈ¢ò
+				setTableCell(columnNameRow, columnNameRow.getCell(0), true, "ÂàóÂêç");
+				setTableCell(columnNameRow, columnNameRow.getCell(1), true, "ÂàóÁ±ªÂûã");
+				setTableCell(columnNameRow, columnNameRow.getCell(2), true, "ÂèØ‰∏∫Á©∫");
+				setTableCell(columnNameRow, columnNameRow.getCell(3), true, "‰∏ªÈîÆ");
+				setTableCell(columnNameRow, columnNameRow.getCell(4), true, "ÈªòËÆ§ÂÄº");
+				setTableCell(columnNameRow, columnNameRow.getCell(5), true, "ÂàóÊ≥®Èáä");
+				setTableCell(columnNameRow, columnNameRow.getCell(6), true, "ÂÖ∂‰ªñ");
 			}
-			for (int k = 2; k < CommonConst.COLUMN_NAME_ARRAY.length; k++) {
-				setTableCell(row, row.getCell(k - 2), false, rowInfo.get(k));
-			}
+
+			setTableCell(dataRow, dataRow.getCell(0), false, rowInfo.getColumnName());
+			setTableCell(dataRow, dataRow.getCell(1), false, rowInfo.getColumnType());
+			setTableCell(dataRow, dataRow.getCell(2), false, rowInfo.getIsNullEnable());
+			setTableCell(dataRow, dataRow.getCell(3), false, rowInfo.getIsPrimaryKey());
+			setTableCell(dataRow, dataRow.getCell(4), false, rowInfo.getDefaultValue());
+			setTableCell(dataRow, dataRow.getCell(5), false, rowInfo.getDescription());
+			setTableCell(dataRow, dataRow.getCell(6), false, rowInfo.getOther());
 		}
 		xwpfDocument.setTable(pos, xwpfTable);
 		xwpfDocument.createParagraph();
 	}
 
 	/**
-	 * …Ë÷√±Ì∏ÒøÌ∂»
+	 * ËÆæÁΩÆË°®Ê†ºÂÆΩÂ∫¶
 	 *
 	 * @param xwpfTable
 	 */
 	public void setTableWidth(XWPFTable xwpfTable) {
 		CTTblPr ctTblPr = xwpfTable.getCTTbl().getTblPr();
 		ctTblPr.getTblW().setType(STTblWidth.DXA);
-		ctTblPr.getTblW().setW(new BigInteger(CommonConst.tableWidth));
+		ctTblPr.getTblW().setW(new BigInteger(tableWidth));
 	}
 
 	/**
-	 * …Ë÷√±Ì∏Òµ•‘™∏Òƒ⁄»›
+	 * ËÆæÁΩÆË°®Ê†ºÂçïÂÖÉÊ†ºÂÜÖÂÆπ
 	 *
 	 * @param tableRow
 	 * @param tableCell
@@ -126,22 +155,22 @@ public class DocHelper {
 		if (isFillCollor) {
 			CTTcPr tcpr = tableCell.getCTTc().addNewTcPr();
 			CTShd ctshd = tcpr.addNewShd();
-			ctshd.setFill(CommonConst.tableCellBgColor);
+			ctshd.setFill(tableCellBgColor);
 		}
-		// …Ë÷√µ•‘™∏ÒøÌ∂»
+		// ËÆæÁΩÆÂçïÂÖÉÊ†ºÂÆΩÂ∫¶
 		CTTcPr tcpr = tableCell.getCTTc().addNewTcPr();
 		CTTblWidth cellw = tcpr.addNewTcW();
-		cellw.setW(new BigInteger(CommonConst.tableCellWidth));
+		cellw.setW(new BigInteger(tableCellWidth));
 
-		// …Ë÷√µ•‘™∏Ò∏ﬂ∂»
+		// ËÆæÁΩÆÂçïÂÖÉÊ†ºÈ´òÂ∫¶
 		CTTrPr trPr = tableRow.getCtRow().addNewTrPr();
 		CTHeight cellH = trPr.addNewTrHeight();
-		cellH.setVal(new BigInteger(CommonConst.tableCellHeight));
+		cellH.setVal(new BigInteger(tableCellHeight));
 
-		// …Ë÷√±Ì∏Ò◊÷ÃÂ∫Õƒ⁄»›
+		// ËÆæÁΩÆË°®Ê†ºÂ≠ó‰ΩìÂíåÂÜÖÂÆπ
 		XWPFParagraph pIO = tableCell.getParagraphs().get(0);
 		XWPFRun rIO = pIO.createRun();
-		rIO.setFontFamily("ÀŒÃÂ");
+		rIO.setFontFamily("ÂÆã‰Ωì");
 		rIO.setFontSize(10);
 		rIO.setText(text);
 		tableCell.setParagraph(pIO);
@@ -150,7 +179,7 @@ public class DocHelper {
 	}
 
 	/**
-	 * øÁ¡–∫œ≤¢µ•‘™∏Ò
+	 * Ë∑®ÂàóÂêàÂπ∂ÂçïÂÖÉÊ†º
 	 *
 	 * @param table
 	 * @param row

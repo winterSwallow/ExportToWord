@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="lib/mysql-connector-java-8.0.16.jar"/>
 	<classpathentry kind="lib" path="lib/xmlbeans-2.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.17.jar"/>
+	<classpathentry kind="lib" path="lib/sqljdbc42.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
