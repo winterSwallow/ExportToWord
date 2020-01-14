@@ -22,7 +22,7 @@ public class Startup {
 	/**
 	 * 定义SqlServer查询语句
 	 */
-	public static String SQLSERVER_QUERY_STATEMENT = "SELECT\r\n" + "	d.name '英文名',\r\n" + "	'' '中文名',\r\n"
+	public static String SQLSERVER_QUERY_STATEMENT = "SELECT\r\n" + "	d.name '英文名',\r\n" + "	f.value '中文名',\r\n"
 			+ "	a.name '列名',\r\n"
 			+ "	b.name + '(' + CAST ( COLUMNPROPERTY( a.id, a.name, 'PRECISION' ) AS VARCHAR ) + ')' '列类型',\r\n"
 			+ "	( CASE WHEN a.isnullable= 1 THEN '是' ELSE '' END ) '可为空',\r\n" + "	(\r\n" + "	CASE\r\n"
@@ -35,13 +35,13 @@ public class Startup {
 			+ "				'是' ELSE '' \r\n" + "			END \r\n" + "			) '主键',\r\n"
 			+ "			isnull( e.text, '' ) '默认值',\r\n" + "			CONVERT (\r\n"
 			+ "				VARCHAR ( 50 ),\r\n" + "			ISNULL( g.[value], '' )) AS '列注释',\r\n"
-			+ "			'' AS '其他' \r\n" + "		FROM\r\n" + "			syscolumns a\r\n"
+			+ "			(case when COLUMNPROPERTY( a.id,a.name,'IsIdentity')=1 then '自增'else '' end) AS '其他' \r\n" + "		FROM\r\n" + "			syscolumns a\r\n"
 			+ "			LEFT JOIN systypes b ON a.xtype= b.xusertype\r\n"
 			+ "			INNER JOIN sysobjects d ON a.id= d.id \r\n" + "			AND d.xtype= 'U' \r\n"
 			+ "			AND d.name<> 'dtproperties'\r\n" + "			LEFT JOIN syscomments e ON a.cdefault= e.id\r\n"
 			+ "			LEFT JOIN sys.extended_properties g ON a.id= g.major_id \r\n"
 			+ "			AND a.colid= g.minor_id\r\n"
-			+ "			LEFT JOIN sys.extended_properties f ON d.id= f.class \r\n" + "			AND f.minor_id= 0 \r\n"
+			+ "			LEFT JOIN sys.extended_properties f ON d.id= f.major_id \r\n" + "			AND f.minor_id= 0 \r\n"
 			+ "		WHERE\r\n" + "			b.name IS NOT NULL \r\n" + "		ORDER BY\r\n" + "		a.id,\r\n"
 			+ "	a.colorder";
 
